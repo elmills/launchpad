@@ -15,10 +15,10 @@
 const CONFIG = {
 
   // ── GLOBAL HEADER: Salary & contribution controls ─────────────────────────
-  'g-sal': { min: 40000,  max: 200000, step: 1000,  value: 100000 }, // Annual salary
+  'g-sal': { min: 35000,  max: 200000, step: 1000,  value: 80000 }, // Annual salary
   'g-k4':  { min: 0,      max: 23500,  step: 500,   value: 23500  }, // 401(k) annual contribution
   'g-hsa': { min: 0,      max: 4300,   step: 100,   value: 4300   }, // HSA annual contribution
-  'g-ri':  { min: 0,      max: 7000,   step: 500,   value: 0      }, // Roth IRA annual contribution
+  'g-ri':  { min: 0,      max: 7000,   step: 100,   value: 0      }, // Roth IRA annual contribution
 
   // ── BUDGET TAB: Monthly spending plan ─────────────────────────────────────
   'b-rent':     { min: 0,   max: 3000, step: 50,  value: 900  }, // Rent / mortgage
