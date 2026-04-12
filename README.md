@@ -95,8 +95,6 @@ In Cloudflare Pages → Custom domains → add `launchpad.elmills.net`
 - FICA: 7.65%
 - Single filer
 
-*For educational purposes only — not financial advice.*
-
 ---
 
 ## License
