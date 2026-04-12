@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Launchpad — Nucor Crawfordsville</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1A3A5C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Launchpad">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- Description for share/SEO -->
+<meta name="description" content="Financial Launchpad — Nucor Steel Crawfordsville. Your complete money guide: budget, paycheck, Coast FIRE, Retire at 50, and benefits calculator.">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+:root{
+  --green:#1E6B45;--green-l:#52B788;--green-bg:#D8F3DC;--green-dark:#14532D;
+  --blue:#1A3A5C;--blue-m:#2563A8;--blue-l:#93C5FD;--blue-bg:#DBEAFE;
+  --amber:#7C4D0A;--amber-l:#F59E0B;--amber-bg:#FEF3C7;
+  --purple:#5B21B6;--purple-bg:#EDE9FE;
+  --teal:#0F766E;--teal-bg:#CCFBF1;
+  --coral:#9F3E1A;--coral-bg:#FEE8DC;
+  --red:#991B1B;--red-bg:#FEE2E2;
+  --border:#E2E8F0;--bg:#F8FAFC;--surface:#fff;
+  --text:#0F172A;--muted:#64748B;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-text-size-adjust:100%}
+
+/* ── HEADER ── */
+.header{background:var(--blue);padding:1.25rem 1.75rem 0;color:#fff}
+.header-row{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.header h1{font-family:'DM Serif Display',serif;font-size:1.6rem;font-weight:400;line-height:1.2;margin-bottom:3px}
+.header-sub{font-size:12px;opacity:.6;margin-bottom:.5rem}
+.global-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.gc-item{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.8)}
+.gc-item label{white-space:nowrap;font-size:12px;opacity:.8}
+.gc-item input[type=range]{width:140px;-webkit-appearance:none;height:6px;background:rgba(255,255,255,.3);border-radius:3px;outline:none;cursor:pointer}
+.gc-item input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.gc-val{font-weight:600;min-width:70px;font-size:13px}
+.export-btn{padding:7px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.export-btn:hover{background:rgba(255,255,255,.25)}
+.export-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── MOBILE HEADER TOGGLE ── */
+.controls-toggle{display:none;padding:8px 14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin-bottom:4px;width:100%;text-align:left}
+.controls-toggle:after{content:'▾';float:right;transition:transform .2s}
+.controls-toggle.open:after{transform:rotate(180deg)}
+
+/* ── TABS ── */
+.tabs-wrap{position:relative}
+.tabs-wrap::after{content:'';position:absolute;right:0;top:0;bottom:0;width:28px;background:linear-gradient(to right,transparent,var(--blue));pointer-events:none;border-radius:0 0 0 0;z-index:1}
+.tabs{display:flex;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:1px;padding-right:28px}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{padding:9px 15px;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-radius:7px 7px 0 0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.tab-btn.active{background:var(--bg);color:var(--blue)}
+.tab-btn:hover:not(.active){background:rgba(255,255,255,.18);color:#fff}
+
+/* ── PANELS ── */
+.panel{display:none;padding:1.5rem 1.75rem;max-width:1100px}
+.panel.active{display:block}
+
+/* ── LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.auto-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:8px}
+@media(max-width:720px){.two-col,.three-col{grid-template-columns:1fr}}
+
+/* ── MOBILE: ≤600px ── */
+@media(max-width:600px){
+  .header{padding:1rem 1rem 0}
+  .header h1{font-size:1.3rem}
+  .header-row{flex-direction:column;align-items:flex-start;gap:.5rem;margin-bottom:.75rem}
+  .controls-toggle{display:block}
+  .global-controls{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%;padding:6px 0}
+  .global-controls.open{display:flex}
+  .gc-item{flex-wrap:wrap;gap:6px}
+  .gc-item label{min-width:90px;font-size:12px}
+  .gc-item input[type=range]{width:100%;flex:1;min-width:0}
+  .gc-val{min-width:auto;text-align:right}
+  .export-btn{width:100%;text-align:center;padding:10px}
+  .panel{padding:1rem}
+  .srow{flex-wrap:wrap;gap:4px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .srow:last-child{border-bottom:none}
+  .srow label{min-width:100%;font-size:13px;color:var(--text);font-weight:500}
+  .srow input[type=range]{flex:1;min-width:0;order:1}
+  .sval{min-width:auto;font-size:13px;order:2}
+  .card{padding:.85rem}
+  .card-title{font-size:10px}
+  .metric-val{font-size:15px}
+  .bucket-grid{grid-template-columns:1fr}
+  .bucket-amount{font-size:18px}
+  .pc-compare{grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .pc-seg{font-size:9px}
+  .diff-box{flex-direction:column;text-align:center;gap:.5rem}
+  .diff-num{font-size:18px}
+  .sc-grid{grid-template-columns:repeat(2,1fr)}
+  .life-grid{grid-template-columns:1fr}
+  .hsa-grid{grid-template-columns:1fr}
+  .order-steps{grid-template-columns:1fr}
+  .auto-grid{grid-template-columns:repeat(2,1fr)}
+  .banner{font-size:12px;padding:8px 10px;line-height:1.6}
+  .note{font-size:11px;padding:7px 10px}
+  .sec-title{font-size:1rem}
+  footer{padding:.75rem 1rem;font-size:10px;line-height:1.6}
+  .legend{gap:8px;font-size:11px}
+  .three-col{gap:.75rem}
+  .hsa-row{flex-direction:column;gap:2px}
+  .hsa-row .hv{text-align:left}
+}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.85rem}
+
+/* ── METRICS ── */
+.metric{background:var(--bg);border-radius:7px;padding:8px 11px}
+.metric-label{font-size:11px;color:var(--muted);margin-bottom:2px;line-height:1.3}
+.metric-val{font-size:17px;font-weight:600;color:var(--text)}
+.metric-val.g{color:var(--green)}.metric-val.b{color:var(--blue-m)}.metric-val.a{color:var(--amber)}
+.metric-val.p{color:var(--purple)}.metric-val.t{color:var(--teal)}.metric-val.r{color:var(--red)}
+
+/* ── SLIDERS (panel) ── */
+.srow{display:flex;align-items:center;gap:10px;margin-bottom:9px;color:var(--muted);font-size:13px}
+.srow label{min-width:168px;flex-shrink:0;font-size:12px}
+.srow input[type=range]{flex:1;-webkit-appearance:none;height:6px;background:var(--border);border-radius:3px;outline:none;cursor:pointer;min-width:0}
+.srow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--blue-m);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.sval{min-width:105px;text-align:right;font-weight:600;color:var(--text);font-size:12px}
+
+/* ── BANNERS ── */
+.banner{border-left:3px solid var(--green);background:var(--green-bg);border-radius:0 7px 7px 0;padding:9px 13px;font-size:13px;line-height:1.7;color:var(--green-dark);margin-bottom:1rem}
+.banner.blue{border-left-color:var(--blue-m);background:var(--blue-bg);color:var(--blue)}
+.banner.amber{border-left-color:var(--amber-l);background:var(--amber-bg);color:var(--amber)}
+.banner.purple{border-left-color:var(--purple);background:var(--purple-bg);color:var(--purple)}
+.banner.red{border-left-color:#dc2626;background:var(--red-bg);color:var(--red)}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:7px;font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:4px}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.note{font-size:12px;color:var(--muted);background:var(--bg);border-radius:7px;padding:8px 12px;line-height:1.6;margin-top:9px}
+
+/* ── BUDGET ── */
+.bucket-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:10px;margin-bottom:1rem}
+.bucket{border-radius:var(--r);padding:11px 13px;border:1px solid var(--border);background:var(--surface)}
+.bucket-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.bucket-name{font-size:13px;font-weight:600}
+.bucket-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.bucket-amount{font-size:22px;font-weight:600;margin-bottom:1px}
+.bucket-mo{font-size:11px;color:var(--muted)}
+.bucket-bar{height:4px;border-radius:2px;background:var(--border);margin:7px 0 5px;overflow:hidden}
+.bucket-fill{height:100%;border-radius:2px}
+.bucket-items{font-size:11px;color:var(--muted);line-height:1.7}
+
+/* ── PAYCHECK BARS ── */
+.pc-compare{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:.85rem}
+.pc-col-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.pc-stack{display:flex;flex-direction:column;gap:2px}
+.pc-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border-radius:3px;overflow:hidden;white-space:nowrap}
+
+/* ── DIFF BOX ── */
+.diff-box{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--green-bg);border:1px solid var(--green-l);border-radius:8px;padding:11px 15px;margin-bottom:1rem}
+.diff-label{font-size:13px;color:var(--green-dark);line-height:1.5}
+.diff-num{font-size:21px;font-weight:600;color:var(--green);white-space:nowrap}
+
+/* ── COAST SCENARIOS ── */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:8px;margin-bottom:1rem}
+.sc-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 11px}
+.sc-lbl{font-size:11px;color:var(--muted);margin-bottom:1px}
+.sc-age{font-size:19px;font-weight:600}
+.sc-age.g{color:var(--green)}.sc-age.a{color:var(--amber)}.sc-age.b{color:var(--blue-m)}
+.sc-sub{font-size:11px;color:var(--muted)}
+
+/* ── LIFE CARDS ── */
+.life-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:1rem}
+.life-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem}
+.life-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px}
+.life-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.life-sub{font-size:12px;color:var(--muted);margin-bottom:8px}
+.lrow{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)}
+.lrow:last-child{border-bottom:none}
+.lrow .lv{font-weight:600}
+
+/* ── HSA TABLE ── */
+.hsa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1rem}
+.hsa-card{border-radius:var(--r);padding:1rem 1.1rem;border:1.5px solid var(--border);background:var(--surface)}
+.hsa-card.top{border-color:var(--green)}
+.hsa-row{display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);gap:.5rem}
+.hsa-row:last-child{border-bottom:none}
+.hsa-row .hk{color:var(--muted);flex:1}
+.hsa-row .hv{font-weight:600;text-align:right;flex-shrink:0}
+.ck{color:var(--green)}.cx{color:var(--red)}
+
+/* ── ORDER STEPS ── */
+.order-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-bottom:1rem}
+.step{border-radius:8px;padding:10px 13px;border:1px solid var(--border)}
+.step-num{font-size:22px;font-weight:600;line-height:1;margin-bottom:4px}
+.step-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.step-detail{font-size:11px;color:var(--muted);line-height:1.5}
+
+.sec-title{font-family:'DM Serif Display',serif;font-size:1.15rem;font-weight:400;color:var(--blue);margin-bottom:3px}
+.sec-sub{font-size:12px;color:var(--muted);margin-bottom:.85rem}
+
+footer{padding:1rem 1.75rem;font-size:11px;color:var(--muted);border-top:1px solid var(--border);background:var(--surface)}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     GLOBAL HEADER + SALARY CONTROLS
+══════════════════════════════════ -->
+<div class="header" id="page-header">
+  <div class="header-row">
+    <div>
+      <h1>Financial Launchpad</h1>
+      <div class="header-sub">Nucor Steel Crawfordsville · Your complete money guide</div>
+    </div>
+    <button class="controls-toggle" id="ctrl-toggle" onclick="toggleControls()">Salary &amp; contribution controls</button>
+    <div class="global-controls" id="global-ctrls">
+      <div class="gc-item">
+        <label>Annual salary</label>
+        <input type="range" id="g-sal" oninput="syncSalary(this.value)">
+        <span class="gc-val" id="g-sal-o"></span>
+      </div>
+      <div class="gc-item">
+        <label>401(k)/yr</label>
+        <input type="range" id="g-k4" oninput="syncK4(this.value)">
+        <span class="gc-val" id="g-k4-o"></span>
+      </div>
+      <div class="gc-item">
+        <label>HSA/yr</label>
+        <input type="range" id="g-hsa" oninput="syncHsa(this.value)">
+        <span class="gc-val" id="g-hsa-o"></span>
+      </div>
+      <div class="gc-item">
+        <label>Roth IRA/yr</label>
+        <input type="range" id="g-ri" oninput="syncRi(this.value)">
+        <span class="gc-val" id="g-ri-o"></span>
+      </div>
+      <button class="export-btn" id="exp-btn" onclick="exportPNG()">&#8681; Export PNG</button>
+    </div>
+  </div>
+  <div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('budget',this)">Budget buckets</button>
+    <button class="tab-btn" onclick="showTab('paycheck',this)">Paycheck</button>
+    <button class="tab-btn" onclick="showTab('coast',this)">Coast FIRE</button>
+    <button class="tab-btn" onclick="showTab('retire',this)">Retire at 50</button>
+    <button class="tab-btn" onclick="showTab('scenarios',this)">Life scenarios</button>
+    <button class="tab-btn" onclick="showTab('benefits',this)">Nucor benefits</button>
+  </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB 1 · BUDGET BUCKETS
+══════════════════════════════════ -->
+<div id="panel-budget" class="panel active">
+
+  <div class="two-col" style="margin-bottom:1rem">
+    <div>
+      <div class="card">
+        <div class="card-title">Monthly spending plan</div>
+        <div class="srow"><label>Rent / mortgage</label><input type="range" id="b-rent" oninput="calcAll()"><span class="sval" id="b-rent-o"></span></div>
+        <div class="srow"><label>Groceries + dining out</label><input type="range" id="b-food" oninput="calcAll()"><span class="sval" id="b-food-o"></span></div>
+        <div class="srow"><label>Utilities (electric/water/gas)</label><input type="range" id="b-util" oninput="calcAll()"><span class="sval" id="b-util-o"></span></div>
+        <div class="srow"><label>Phone</label><input type="range" id="b-phone" oninput="calcAll()"><span class="sval" id="b-phone-o"></span></div>
+        <div class="srow"><label>Subscriptions (streaming etc)</label><input type="range" id="b-subs" oninput="calcAll()"><span class="sval" id="b-subs-o"></span></div>
+        <div class="srow"><label>Personal care + clothing</label><input type="range" id="b-pers" oninput="calcAll()"><span class="sval" id="b-pers-o"></span></div>
+        <div class="srow"><label>Giving / charity / church</label><input type="range" id="b-give" oninput="calcAll()"><span class="sval" id="b-give-o"></span></div>
+        <div class="srow"><label>Misc / buffer</label><input type="range" id="b-misc" oninput="calcAll()"><span class="sval" id="b-misc-o"></span></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Car — the real cost</div>
+        <div class="srow"><label>Payment to yourself (save/mo)</label><input type="range" id="b-carpay" oninput="calcAll()"><span class="sval" id="b-carpay-o"></span></div>
+        <div class="srow"><label>Fuel (monthly estimate)</label><input type="range" id="b-fuel" oninput="calcAll()"><span class="sval" id="b-fuel-o"></span></div>
+        <div class="srow"><label>Auto insurance</label><input type="range" id="b-carins" oninput="calcAll()"><span class="sval" id="b-carins-o"></span></div>
+        <div class="srow"><label>Maintenance / repairs avg</label><input type="range" id="b-carmaint" oninput="calcAll()"><span class="sval" id="b-carmaint-o"></span></div>
+        <div class="note" id="car-note" style="margin-top:0"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Sinking funds (save monthly, spend annually)</div>
+        <div class="srow"><label>Emergency fund build</label><input type="range" id="b-emerg" oninput="calcAll()"><span class="sval" id="b-emerg-o"></span></div>
+        <div class="srow"><label>Travel / vacation</label><input type="range" id="b-travel" oninput="calcAll()"><span class="sval" id="b-travel-o"></span></div>
+        <div class="srow"><label>Christmas / gifts</label><input type="range" id="b-xmas" oninput="calcAll()"><span class="sval" id="b-xmas-o"></span></div>
+        <div class="srow"><label>Future college / school</label><input type="range" id="b-college" oninput="calcAll()"><span class="sval" id="b-college-o"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auto-grid" id="b-metrics" style="margin-bottom:1rem"></div>
+  <div class="banner" id="b-banner"></div>
+  <div class="bucket-grid" id="buckets"></div>
+
+  <div style="position:relative;height:260px;margin-top:.5rem"><canvas id="b-chart"></canvas></div>
+  <div class="note" style="margin-top:.75rem">All amounts shown as a share of monthly take-home pay (after tax and retirement contributions). The retirement bucket is paid first — automatically deducted before your paycheck arrives. Every other bucket is funded from what remains.</div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB 2 · PAYCHECK
+══════════════════════════════════ -->
+<div id="panel-paycheck" class="panel">
+  <div class="two-col">
+    <div>
+      <div class="diff-box">
+        <div class="diff-label" id="diff-label">—</div>
+        <div class="diff-num" id="diff-num">—</div>
+      </div>
+      <div class="banner blue" id="p-banner"></div>
+      <div class="auto-grid" id="p-metrics"></div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Biweekly paycheck — what changes</div>
+        <div class="pc-compare">
+          <div><div class="pc-col-lbl">No savings</div><div class="pc-stack" id="bar-no" style="height:220px"></div></div>
+          <div><div class="pc-col-lbl">401k + HSA</div><div class="pc-stack" id="bar-hsa" style="height:220px"></div></div>
+          <div><div class="pc-col-lbl">+ Roth IRA</div><div class="pc-stack" id="bar-all" style="height:220px"></div></div>
+        </div>
+        <div class="legend">
+          <span><span class="ld" style="background:#6B7280"></span>Income tax</span>
+          <span><span class="ld" style="background:#94A3B8"></span>FICA</span>
+          <span><span class="ld" style="background:#1E6B45"></span>401(k)</span>
+          <span><span class="ld" style="background:#0F766E"></span>HSA</span>
+          <span><span class="ld" style="background:#5B21B6"></span>Roth IRA</span>
+          <span><span class="ld" style="background:#93C5FD"></span>Take-home</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Annual allocation — side by side</div>
+    <div class="legend">
+      <span><span class="ld" style="background:#6B7280"></span>Income tax (fed + IN)</span>
+      <span><span class="ld" style="background:#94A3B8"></span>FICA</span>
+      <span><span class="ld" style="background:#1E6B45"></span>401(k)</span>
+      <span><span class="ld" style="background:#0F766E"></span>HSA</span>
+      <span><span class="ld" style="background:#5B21B6"></span>Roth IRA</span>
+      <span><span class="ld" style="background:#93C5FD"></span>Take-home</span>
+    </div>
+    <div style="position:relative;height:210px"><canvas id="p-chart"></canvas></div>
+    <div class="note" id="p-note"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB 3 · COAST FIRE
+══════════════════════════════════ -->
+<div id="panel-coast" class="panel">
+  <div class="two-col" style="margin-bottom:1rem">
+    <div>
+      <div class="card">
+        <div class="card-title">Coast settings</div>
+        <div class="srow"><label>Current age</label><input type="range" id="c-cage" oninput="calcAll()"><span class="sval" id="c-cage-o"></span></div>
+        <div class="srow"><label>Target retirement age</label><input type="range" id="c-ret" oninput="calcAll()"><span class="sval" id="c-ret-o"></span></div>
+        <div class="srow"><label>Desired annual spending</label><input type="range" id="c-spend" oninput="calcAll()"><span class="sval" id="c-spend-o"></span></div>
+        <div class="srow"><label>Inflation assumption</label><input type="range" id="c-inf" oninput="calcAll()"><span class="sval" id="c-inf-o"></span></div>
+        <div class="srow"><label>Expected annual return</label><input type="range" id="c-rate" oninput="calcAll()"><span class="sval" id="c-rate-o"></span></div>
+      </div>
+    </div>
+    <div>
+      <div class="banner" id="c-banner"></div>
+      <div class="auto-grid" id="c-metrics"></div>
+    </div>
+  </div>
+  <p class="sec-title">How changing one factor shifts the coast date</p>
+  <p class="sec-sub">All other inputs held at current settings above</p>
+  <div class="sc-grid" id="c-scenarios"></div>
+  <div class="card">
+    <div class="card-title">Balance trajectory</div>
+    <div class="legend">
+      <span><span class="ld" style="background:#2563A8"></span>Contributing</span>
+      <span><span class="ld" style="background:#1E6B45"></span>Coasting (zero new contributions)</span>
+      <span><span class="ld" style="background:#F59E0B"></span>Required nest egg</span>
+    </div>
+    <div style="position:relative;height:290px"><canvas id="c-chart"></canvas></div>
+    <div class="note" id="c-note"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB 4 · RETIRE AT 50
+══════════════════════════════════ -->
+<div id="panel-retire" class="panel">
+  <div class="two-col" style="margin-bottom:1rem">
+    <div>
+      <div class="card">
+        <div class="card-title">Retire at 50 settings</div>
+        <div class="srow"><label>Current age</label><input type="range" id="r-cage" oninput="calcAll()"><span class="sval" id="r-cage-o"></span></div>
+        <div class="srow"><label>Desired spending (today's $)</label><input type="range" id="r-spend" oninput="calcAll()"><span class="sval" id="r-spend-o"></span></div>
+        <div class="srow"><label>Inflation assumption</label><input type="range" id="r-inf" oninput="calcAll()"><span class="sval" id="r-inf-o"></span></div>
+        <div class="srow"><label>Safe withdrawal rate</label><input type="range" id="r-swr" oninput="calcAll()"><span class="sval" id="r-swr-o"></span></div>
+        <div class="srow"><label>Expected annual return</label><input type="range" id="r-rate" oninput="calcAll()"><span class="sval" id="r-rate-o"></span></div>
+      </div>
+    </div>
+    <div>
+      <div class="banner blue" id="r-banner"></div>
+      <div class="auto-grid" id="r-metrics"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Coast date to retire at 50</div>
+    <div class="legend">
+      <span><span class="ld" style="background:#2563A8"></span>Contributing</span>
+      <span><span class="ld" style="background:#1E6B45"></span>Coasting to target</span>
+      <span><span class="ld" style="background:#F59E0B"></span>Required nest egg at 50</span>
+    </div>
+    <div style="position:relative;height:290px"><canvas id="r-chart"></canvas></div>
+    <div class="note" id="r-note"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB 5 · LIFE SCENARIOS
+══════════════════════════════════ -->
+<div id="panel-scenarios" class="panel">
+  <p class="sec-title">What if you don't stay at Nucor forever?</p>
+  <p class="sec-sub">Every path looks different — but the money saved early keeps compounding regardless of what comes next.</p>
+
+  <div class="life-grid">
+    <div class="life-card">
+      <span class="life-tag" style="background:var(--green-bg);color:var(--green-dark)">Path A · Stay 5 years</span>
+      <div class="life-title">Max everything, then reassess</div>
+      <div class="life-sub">5 full years of contributions starting at age 19</div>
+      <div class="lrow"><span>Total deposited over 5 yrs</span><span class="lv g" id="sA-dep">—</span></div>
+      <div class="lrow"><span>Balance after 5 yrs (with growth)</span><span class="lv g" id="sA-bal5">—</span></div>
+      <div class="lrow"><span>That balance grows to at age 50</span><span class="lv g" id="sA-at50">—</span></div>
+      <div class="lrow"><span>Coast point reached?</span><span class="lv" id="sA-coast">—</span></div>
+      <div class="lrow"><span>401(k) if you leave</span><span class="lv">Roll to IRA ✅</span></div>
+      <div class="lrow"><span>Tuition reimbursement eligible</span><span class="lv">After 6 months ✅</span></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">5 years of max savings at 19 very likely crosses the coast point. The money works for 25+ more years without adding another dollar.</div>
+    </div>
+
+    <div class="life-card">
+      <span class="life-tag" style="background:var(--blue-bg);color:var(--blue)">Path B · Leave after 2 years</span>
+      <div class="life-title">Nucor as a launchpad → college</div>
+      <div class="life-sub">2 years max contributions, then pivot</div>
+      <div class="lrow"><span>Total deposited over 2 yrs</span><span class="lv b" id="sB-dep">—</span></div>
+      <div class="lrow"><span>Balance after 2 yrs (with growth)</span><span class="lv b" id="sB-bal2">—</span></div>
+      <div class="lrow"><span>That balance grows to at age 50</span><span class="lv b" id="sB-at50">—</span></div>
+      <div class="lrow"><span>Coast point reached?</span><span class="lv" id="sB-coast">—</span></div>
+      <div class="lrow"><span>Roth contributions (not earnings)</span><span class="lv">Withdraw anytime ✅</span></div>
+      <div class="lrow"><span>401(k) → roll to Roth IRA</span><span class="lv">Pay tax while $0 income ✅</span></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">Even 2 years is a massive head start. <strong>Do not cash out</strong> — roll the 401(k) to an IRA. In a low-income year (school), convert to Roth and pay almost zero tax.</div>
+    </div>
+
+    <div class="life-card">
+      <span class="life-tag" style="background:var(--purple-bg);color:var(--purple)">Path C · Stay home with kids</span>
+      <div class="life-title">Front-load now, step back later</div>
+      <div class="life-sub">Save hard at 19–24, then choose family</div>
+      <div class="lrow"><span>Roth contributions → withdrawable</span><span class="lv">Anytime, no penalty ✅</span></div>
+      <div class="lrow"><span>HSA stays yours forever</span><span class="lv">Portable always ✅</span></div>
+      <div class="lrow"><span>Spousal IRA (if married)</span><span class="lv">$7,000/yr still ✅</span></div>
+      <div class="lrow"><span>401(k) keeps compounding</span><span class="lv">No action needed ✅</span></div>
+      <div class="lrow"><span>Nucor paid parental leave</span><span class="lv">Available ✅</span></div>
+      <div class="lrow"><span>Balance grows to at age 50</span><span class="lv p" id="sC-at50">—</span></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">Years at home don't derail the math. The accounts compound silently. A spousal IRA lets a non-working spouse still build retirement savings.</div>
+    </div>
+
+    <div class="life-card">
+      <span class="life-tag" style="background:var(--amber-bg);color:var(--amber)">Path D · Career welder</span>
+      <div class="life-title">Stay the course, coast early</div>
+      <div class="life-sub">10+ years, hit coast point, live freely</div>
+      <div class="lrow"><span>Coast point (max contributions)</span><span class="lv g" id="sD-coast">—</span></div>
+      <div class="lrow"><span>Total deposited to coast point</span><span class="lv g" id="sD-dep">—</span></div>
+      <div class="lrow"><span>Nest egg at 50</span><span class="lv g" id="sD-nest50">—</span></div>
+      <div class="lrow"><span>Contribution-free years</span><span class="lv g" id="sD-free">—</span></div>
+      <div class="lrow"><span>Nucor profit sharing bonus</span><span class="lv">Adds on top 🎯</span></div>
+      <div class="lrow"><span>Redirect savings after coast</span><span class="lv">House / travel / biz ✅</span></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">After the coast point, that $2,500+/month is yours to redirect — house, business, travel — while retirement takes care of itself.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">The rules that apply to every path</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;font-size:13px;line-height:1.8;color:var(--muted)">
+      <div><strong style="color:var(--text)">Never cash out a 401(k) when leaving.</strong> You'd lose 30–40% to taxes + penalty immediately. Roll it to an IRA — one phone call, costs nothing.</div>
+      <div><strong style="color:var(--text)">The Roth conversion ladder.</strong> Low/zero income year (school, home with kids)? Convert Traditional 401(k) money to Roth IRA. Pay tax at 10% or 0% — then it's tax-free forever.</div>
+      <div><strong style="color:var(--text)">HSA is the most portable account you own.</strong> Never expires. Never tied to an employer. After 65 it becomes a second IRA usable for anything. Max it every year you have access.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TAB 6 · NUCOR BENEFITS
+══════════════════════════════════ -->
+<div id="panel-benefits" class="panel">
+  <p class="sec-title">Nucor Crawfordsville — confirmed benefits</p>
+  <p class="sec-sub">Verify exact plan details and match rates at your open enrollment. These are publicly confirmed benefits.</p>
+
+  <div class="three-col" style="margin-bottom:1.25rem">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Retirement</div>
+      <div style="font-size:13px;line-height:2.1">
+        <div>✅ <strong>401(k)</strong> — up to $23,500/yr (2025)</div>
+        <div>✅ <strong>Profit sharing</strong> bonus → deposited to 401(k)</div>
+        <div>✅ <strong>Employee Stock Purchase Plan</strong></div>
+        <div>✅ 401(k) match (verify % at enrollment)</div>
+        <div>⭐ Known "Yippee Bonus" year-end profit share</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Health &amp; HSA</div>
+      <div style="font-size:13px;line-height:2.1">
+        <div>✅ <strong>HSA — $4,300/yr individual</strong> (2025)</div>
+        <div>✅ Anthem Blue Cross Blue Shield medical</div>
+        <div>✅ Dental + Vision</div>
+        <div>✅ <strong>On-site clinic — free for employees</strong></div>
+        <div>✅ FSA option also available</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Other benefits</div>
+      <div style="font-size:13px;line-height:2.1">
+        <div>✅ <strong>Tuition reimbursement (up to 80%)</strong></div>
+        <div>✅ Short + Long-term disability</div>
+        <div>✅ Paid family / parental leave</div>
+        <div>✅ Life + Critical illness insurance</div>
+        <div>✅ Employee Assistance Program</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-title">Optimal contribution order — fill the buckets in this sequence</p>
+  <p class="sec-sub">The goal isn't to pick one account — it's to fill them in the right order to minimize taxes and maximize growth.</p>
+
+  <div class="order-steps">
+    <div class="step" style="border-color:var(--green);background:var(--green-bg)">
+      <div class="step-num" style="color:var(--green)">①</div>
+      <div class="step-name">401(k) to get full match</div>
+      <div class="step-detail" style="color:var(--green-dark)">Whatever % Nucor matches — capture every dollar of free money first. This is an immediate 50–100% return on that contribution.</div>
+    </div>
+    <div class="step" style="border-color:var(--teal);background:var(--teal-bg)">
+      <div class="step-num" style="color:var(--teal)">②</div>
+      <div class="step-name">Max the HSA ($4,300)</div>
+      <div class="step-detail" style="color:#134e4a">Triple tax advantage — the only account with tax-free contributions, growth, AND withdrawals. Use Nucor's free clinic. Never spend HSA money if you can help it.</div>
+    </div>
+    <div class="step" style="border-color:var(--blue-m);background:var(--blue-bg)">
+      <div class="step-num" style="color:var(--blue-m)">③</div>
+      <div class="step-name">Max rest of 401(k) ($23,500)</div>
+      <div class="step-detail" style="color:var(--blue)">After match + HSA, fill the 401(k) to the $23,500 limit. Every dollar reduces taxable income today and compounds tax-deferred.</div>
+    </div>
+    <div class="step" style="border-color:var(--purple);background:var(--purple-bg)">
+      <div class="step-num" style="color:var(--purple)">④</div>
+      <div class="step-name">Roth IRA ($7,000)</div>
+      <div class="step-detail" style="color:#3b0764">Post-tax now, but 100% tax-free forever. Also your most flexible account — contributions (not earnings) can be withdrawn anytime without penalty if life changes.</div>
+    </div>
+    <div class="step" style="border-color:var(--amber-l);background:var(--amber-bg)">
+      <div class="step-num" style="color:var(--amber)">⑤</div>
+      <div class="step-name">Taxable brokerage</div>
+      <div class="step-detail" style="color:var(--amber)">If you've maxed everything above and still have money to invest — open a taxable brokerage at Fidelity or Vanguard. No limits, but no tax shelter.</div>
+    </div>
+  </div>
+
+  <div class="hsa-grid">
+    <div class="hsa-card top">
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">HSA — "stealth retirement account"</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px">Requires Nucor HDHP plan</div>
+      <div class="hsa-row"><div class="hk">2025 limit (individual)</div><div class="hv">$4,300</div></div>
+      <div class="hsa-row"><div class="hk">Tax on contributions</div><div class="hv ck">None — pre-tax</div></div>
+      <div class="hsa-row"><div class="hk">Tax on growth</div><div class="hv ck">None</div></div>
+      <div class="hsa-row"><div class="hk">Tax on withdrawals (medical)</div><div class="hv ck">None ever</div></div>
+      <div class="hsa-row"><div class="hk">Tax after 65 (any purpose)</div><div class="hv ck">Ordinary income (like IRA)</div></div>
+      <div class="hsa-row"><div class="hk">Rolls over year to year</div><div class="hv ck">Yes — never expires</div></div>
+      <div class="hsa-row"><div class="hk">Invest in index funds</div><div class="hv ck">Yes</div></div>
+      <div class="hsa-row"><div class="hk">Reduces state + federal tax</div><div class="hv ck">Yes — both</div></div>
+      <div class="hsa-row"><div class="hk">Nucor free clinic = $0 spend</div><div class="hv ck">Bank it, invest it</div></div>
+    </div>
+    <div class="hsa-card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">Traditional 401(k)</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px">Through Nucor — biggest limit</div>
+      <div class="hsa-row"><div class="hk">2025 limit</div><div class="hv">$23,500</div></div>
+      <div class="hsa-row"><div class="hk">Tax on contributions</div><div class="hv ck">None — pre-tax</div></div>
+      <div class="hsa-row"><div class="hk">Tax on growth</div><div class="hv ck">None (deferred)</div></div>
+      <div class="hsa-row"><div class="hk">Tax on withdrawals</div><div class="hv cx">Yes — ordinary income</div></div>
+      <div class="hsa-row"><div class="hk">Early withdrawal (&lt;59½)</div><div class="hv cx">10% penalty</div></div>
+      <div class="hsa-row"><div class="hk">Rolls over if you leave</div><div class="hv ck">Yes — roll to IRA</div></div>
+      <div class="hsa-row"><div class="hk">Invest in index funds</div><div class="hv ck">Yes</div></div>
+      <div class="hsa-row"><div class="hk">Profit sharing added here</div><div class="hv ck">Yes — Nucor bonus</div></div>
+    </div>
+    <div class="hsa-card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">Roth IRA</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px">Open at Fidelity or Vanguard</div>
+      <div class="hsa-row"><div class="hk">2025 limit</div><div class="hv">$7,000</div></div>
+      <div class="hsa-row"><div class="hk">Tax on contributions</div><div class="hv cx">Post-tax dollars</div></div>
+      <div class="hsa-row"><div class="hk">Tax on growth</div><div class="hv ck">None — ever</div></div>
+      <div class="hsa-row"><div class="hk">Tax on withdrawals (retirement)</div><div class="hv ck">None</div></div>
+      <div class="hsa-row"><div class="hk">Contributions withdrawable anytime</div><div class="hv ck">No penalty ever</div></div>
+      <div class="hsa-row"><div class="hk">Rolls over year to year</div><div class="hv ck">Yes</div></div>
+      <div class="hsa-row"><div class="hk">Reduces taxable income now</div><div class="hv cx">No</div></div>
+      <div class="hsa-row"><div class="hk">Portable — no employer tie</div><div class="hv ck">Always yours</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>For educational purposes only — not financial advice. Tax calculations use 2025 federal brackets + OBBB-updated standard deduction ($15,750) + Indiana flat rate (3.05%), single filer. Nucor benefits sourced from public records — verify specifics at open enrollment. Consult a fee-only fiduciary advisor for personalized guidance.</footer>
+
+<!-- Load config first, then app logic -->
+<script src="/config.js"></script>
+<script>
+// ════════════════════════════════════
+// MOBILE CONTROLS TOGGLE
+// ════════════════════════════════════
+function toggleControls(){
+  const el=document.getElementById('global-ctrls');
+  const btn=document.getElementById('ctrl-toggle');
+  el.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// Apply CONFIG to all sliders on page load
+function applyConfig(){
+  for(const[id,cfg] of Object.entries(CONFIG)){
+    const el=document.getElementById(id);
+    if(!el)continue;
+    el.min=cfg.min; el.max=cfg.max; el.step=cfg.step; el.value=cfg.value;
+  }
+}
+
+// ════════════════════════════════════
+// TAX ENGINE
+// ════════════════════════════════════
+const FED=[[11925,.10],[48475,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]];
+const STD=15750,IN_R=0.0305,FICA_R=0.0765; // 2025 std deduction updated per OBBB (One Big Beautiful Bill)
+function fedTax(ti){let t=0,p=0;for(const[l,r]of FED){if(ti<=p)break;t+=(Math.min(ti,l)-p)*r;p=l;}return t;}
+function taxCalc(sal,pretax){
+  const fti=Math.max(0,sal-pretax-STD),fed=fedTax(fti);
+  const ist=Math.max(0,sal-pretax)*IN_R,fica=sal*FICA_R;
+  return{fed,inState:ist,fica,total:fed+ist+fica};
+}
+
+// ════════════════════════════════════
+// FORMATTERS
+// ════════════════════════════════════
+function fmt(n){return'$'+Math.round(n).toLocaleString();}
+function fmtK(n){const a=Math.abs(n);return(n<0?'-':'')+(a>=1e6?'$'+(a/1e6).toFixed(2)+'M':'$'+Math.round(a/1000).toLocaleString()+'k');}
+function fp(n){return n.toFixed(1)+'%';}
+
+// ════════════════════════════════════
+// GLOBAL STATE — single source of truth
+// ════════════════════════════════════
+function getSal(){ return +document.getElementById('g-sal').value; }
+function getK4(){  return +document.getElementById('g-k4').value;  }
+function getHsa(){ return +document.getElementById('g-hsa').value; }
+function getRi(){  return +document.getElementById('g-ri').value;  }
+function getPretax(){ return getK4()+getHsa(); }
+function getAllContrib(){ return getK4()+getHsa()+getRi(); }
+
+// sync from global header → update labels, recalc all
+function syncSalary(v){ document.getElementById('g-sal-o').textContent=fmt(+v); calcAll(); }
+function syncK4(v){     document.getElementById('g-k4-o').textContent= (+v===CONFIG['g-k4'].max?'$23,500 (max)':fmt(+v)); calcAll(); }
+function syncHsa(v){    document.getElementById('g-hsa-o').textContent=(+v===CONFIG['g-hsa'].max?'$4,300 (max)':fmt(+v));  calcAll(); }
+function syncRi(v){     document.getElementById('g-ri-o').textContent= (+v===CONFIG['g-ri'].max?'$7,000 (max)':fmt(+v));  calcAll(); }
+
+// ════════════════════════════════════
+// COAST ENGINE
+// ════════════════════════════════════
+function computeCoast({startAge,retireAge,annualContrib,nestEgg,rate}){
+  let bal=0,coastAge=null;
+  const ages=[],withC=[],coastS=[],target=[];
+  for(let age=startAge;age<=retireAge+3;age++){
+    ages.push(age);target.push(Math.round(nestEgg));
+    const yl=retireAge-age,thresh=yl>0?nestEgg/Math.pow(1+rate,yl):nestEgg;
+    if(coastAge===null){
+      bal=(bal+annualContrib)*(1+rate);withC.push(Math.round(bal));coastS.push(null);
+      if(bal>=thresh&&age<=retireAge)coastAge=age;
+    }else{withC.push(null);bal*=(1+rate);coastS.push(Math.round(bal));}
+  }
+  return{ages,withC,coastS,target,coastAge};
+}
+function getCoastAge(sAge,rAge,contrib,nestEgg,rate){
+  const r=computeCoast({startAge:sAge,retireAge:rAge,annualContrib:contrib,nestEgg,rate});
+  return(r.coastAge&&r.coastAge<=rAge)?r.coastAge:null;
+}
+// compound N years from start balance
+function compoundN(startBal,contrib,years,rate){
+  let b=startBal;
+  for(let i=0;i<years;i++) b=(b+contrib)*(1+rate);
+  return b;
+}
+function growTo(bal,years,rate){return bal*Math.pow(1+rate,years);}
+
+// ════════════════════════════════════
+// CHART INSTANCES
+// ════════════════════════════════════
+let pChart,cChart,rChart,bChart;
+
+// ════════════════════════════════════
+// BUDGET
+// ════════════════════════════════════
+function calcBudget(){
+  const sal=getSal(), k4=getK4(), hsa=getHsa(), ri=getRi();
+  const rent=+document.getElementById('b-rent').value;
+  const food=+document.getElementById('b-food').value;
+  const util=+document.getElementById('b-util').value;
+  const phone=+document.getElementById('b-phone').value;
+  const subs=+document.getElementById('b-subs').value;
+  const pers=+document.getElementById('b-pers').value;
+  const give=+document.getElementById('b-give').value;
+  const misc=+document.getElementById('b-misc').value;
+  const carpay=+document.getElementById('b-carpay').value;
+  const fuel=+document.getElementById('b-fuel').value;
+  const carins=+document.getElementById('b-carins').value;
+  const carmaint=+document.getElementById('b-carmaint').value;
+  const emerg=+document.getElementById('b-emerg').value;
+  const travel=+document.getElementById('b-travel').value;
+  const xmas=+document.getElementById('b-xmas').value;
+  const college=+document.getElementById('b-college').value;
+
+  // labels
+  sv('b-rent-o',fmt(rent)); sv('b-food-o',fmt(food)); sv('b-util-o',fmt(util));
+  sv('b-phone-o',fmt(phone)); sv('b-subs-o',fmt(subs)); sv('b-pers-o',fmt(pers));
+  sv('b-give-o',fmt(give)); sv('b-misc-o',fmt(misc));
+  sv('b-carpay-o',fmt(carpay)); sv('b-fuel-o',fmt(fuel));
+  sv('b-carins-o',fmt(carins)); sv('b-carmaint-o',fmt(carmaint));
+  sv('b-emerg-o',fmt(emerg)); sv('b-travel-o',fmt(travel));
+  sv('b-xmas-o',fmt(xmas)); sv('b-college-o',fmt(college));
+
+  // take-home monthly
+  const t=taxCalc(sal,k4+hsa);
+  const takeHomeMo=(sal-k4-hsa-ri-t.total)/12;
+  const retMo=(k4+hsa+ri)/12;
+
+  const carTotal=carpay+fuel+carins+carmaint;
+  const sinkTotal=emerg+travel+xmas+college;
+  const fixedTotal=rent+util+phone+subs;
+  const flexTotal=food+pers+give+misc;
+  const totalOut=fixedTotal+carTotal+sinkTotal+flexTotal;
+  const leftover=takeHomeMo-totalOut;
+
+  // car note
+  document.getElementById('car-note').innerHTML=
+    `True car cost: <strong>${fmt(carTotal)}/mo</strong> — paying yourself ${fmt(carpay)}/mo means <strong>${fmt(carpay*24)}</strong> saved in 2 years to buy a reliable used car with cash. No interest. Ever.`;
+
+  // metrics
+  sv('b-metrics',`
+    <div class="metric"><div class="metric-label">Monthly take-home</div><div class="metric-val b">${fmt(takeHomeMo)}</div></div>
+    <div class="metric"><div class="metric-label">Retirement (auto-deducted)</div><div class="metric-val g">${fmt(retMo)}</div></div>
+    <div class="metric"><div class="metric-label">Fixed expenses</div><div class="metric-val">${fmt(fixedTotal)}</div></div>
+    <div class="metric"><div class="metric-label">Car (true total cost)</div><div class="metric-val a">${fmt(carTotal)}</div></div>
+    <div class="metric"><div class="metric-label">Sinking funds</div><div class="metric-val t">${fmt(sinkTotal)}</div></div>
+    <div class="metric"><div class="metric-label">Flexible spending</div><div class="metric-val">${fmt(flexTotal)}</div></div>
+    <div class="metric"><div class="metric-label">Buffer / leftover</div><div class="metric-val ${leftover>=0?'g':'r'}">${fmt(leftover)}</div></div>
+  `);
+
+  const bEl=document.getElementById('b-banner');
+  if(leftover<0){
+    bEl.className='banner red';
+    bEl.innerHTML=`<strong>Over budget by ${fmt(Math.abs(leftover))}/mo.</strong> Reduce car payment-to-self, sinking funds, or flexible spending until this is positive.`;
+  } else {
+    bEl.className='banner';
+    bEl.innerHTML=`<strong>Budget balanced with a ${fmt(leftover)}/mo buffer.</strong> That's ${fmt(leftover*12)}/yr extra — consider adding it to the Roth IRA (up to $7,000/yr) or increasing your emergency fund target.`;
+  }
+
+  // buckets — expressed as % of take-home
+  const th=takeHomeMo;
+  const bucketDefs=[
+    {name:'Retirement',color:'#1E6B45',bg:'#D8F3DC',tc:'#14532D',amount:retMo,items:`401(k) $${Math.round(k4/12)}/mo · HSA $${Math.round(hsa/12)}/mo · Roth $${Math.round(ri/12)}/mo — paid before paycheck`},
+    {name:'Housing',color:'#2563A8',bg:'#DBEAFE',tc:'#1e3a8a',amount:fixedTotal,items:`Rent ${fmt(rent)} · Utilities ${fmt(util)} · Phone ${fmt(phone)} · Subscriptions ${fmt(subs)}`},
+    {name:'Transportation',color:'#F59E0B',bg:'#FEF3C7',tc:'#7C4D0A',amount:carTotal,items:`Save ${fmt(carpay)} · Fuel ${fmt(fuel)} · Insurance ${fmt(carins)} · Maintenance ${fmt(carmaint)}`},
+    {name:'Food',color:'#0F766E',bg:'#CCFBF1',tc:'#134e4a',amount:food,items:`Groceries + dining out combined`},
+    {name:'Giving',color:'#9F3E1A',bg:'#FEE8DC',tc:'#7c2d12',amount:give,items:`Church / charity / community — set this intentionally`},
+    {name:'Sinking funds',color:'#5B21B6',bg:'#EDE9FE',tc:'#3b0764',amount:sinkTotal,items:`Emergency ${fmt(emerg)} · Travel ${fmt(travel)} · Christmas ${fmt(xmas)} · College ${fmt(college)}`},
+    {name:'Personal + misc',color:'#6B7280',bg:'#F1F5F9',tc:'#334155',amount:pers+misc,items:`Personal care ${fmt(pers)} · Misc / buffer ${fmt(misc)}`},
+  ];
+  sv('buckets',bucketDefs.map(b=>{
+    const pct=th>0?Math.round(b.amount/th*100):0;
+    return`<div class="bucket" style="border-left:3px solid ${b.color}">
+      <div class="bucket-head">
+        <div class="bucket-name">${b.name}</div>
+        <div class="bucket-badge" style="background:${b.bg};color:${b.tc}">${pct}% of take-home</div>
+      </div>
+      <div class="bucket-amount" style="color:${b.color}">${fmt(b.amount)}</div>
+      <div class="bucket-mo">per month</div>
+      <div class="bucket-bar"><div class="bucket-fill" style="width:${Math.min(100,pct*1.5)}%;background:${b.color}"></div></div>
+      <div class="bucket-items">${b.items}</div>
+    </div>`;
+  }).join(''));
+
+  // donut chart
+  const bColors=bucketDefs.map(b=>b.color);
+  const bData=bucketDefs.map(b=>Math.max(0,Math.round(b.amount)));
+  if(bChart)bChart.destroy();
+  bChart=new Chart(document.getElementById('b-chart'),{
+    type:'doughnut',
+    data:{labels:bucketDefs.map(b=>b.name),datasets:[{data:bData,backgroundColor:bColors,borderWidth:2,borderColor:'#F8FAFC'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{size:12},padding:10}},
+      tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)+'/mo ('+Math.round(ctx.raw/th*100)+'% of take-home)'}}}}
+  });
+}
+
+// ════════════════════════════════════
+// PAYCHECK
+// ════════════════════════════════════
+function calcPaycheck(){
+  const sal=getSal(),k4=getK4(),hsa=getHsa(),ri=getRi();
+  const pretax=k4+hsa;
+  const tNo=taxCalc(sal,0),tHsa=taxCalc(sal,pretax);
+  const thNo=(sal-tNo.total)/26;
+  const thHsa=(sal-pretax-tHsa.total)/26;
+  const thAll=(sal-pretax-ri-tHsa.total)/26;
+  const bwDiff=thAll-thNo;
+  const taxSaved=(tNo.total-tHsa.total)/26;
+
+  sv('diff-num',fmt(Math.abs(bwDiff))+'/paycheck');
+  sv('diff-label',`Saving <strong>${fmt(k4+hsa+ri)}/yr</strong> only cuts take-home by <strong>${fmt(Math.abs(bwDiff))}/paycheck</strong> — because <strong>${fmt(taxSaved)}/paycheck</strong> in taxes is automatically avoided by the 401(k) + HSA.`);
+  const e0=tNo.total/sal*100,eH=tHsa.total/sal*100;
+  sv('p-banner',`Effective tax rate drops <strong>${fp(e0)} → ${fp(eH)}</strong> just from the 401(k) + HSA. Pre-tax retirement: <strong>${fmt(k4+hsa)}/yr</strong>. Add Roth post-tax: total <strong>${fmt(k4+hsa+ri)}/yr</strong> invested for retirement.`);
+
+  function buildBar(id,segs,total){
+    const el=document.getElementById(id);
+    el.innerHTML=segs.map(s=>{
+      if(!s.v||s.v<=0)return'';
+      const h=Math.max(4,Math.round(s.v/total*220));
+      const light=s.c==='#93C5FD';
+      return`<div class="pc-seg" style="height:${h}px;background:${s.c};color:${light?'#0F172A':'#fff'}">${h>15?fmt(s.v):''}</div>`;
+    }).join('');
+  }
+  const totBW=sal/26;
+  buildBar('bar-no',[{v:Math.round((tNo.fed+tNo.inState)/26),c:'#6B7280'},{v:Math.round(tNo.fica/26),c:'#94A3B8'},{v:0,c:'#1E6B45'},{v:0,c:'#0F766E'},{v:0,c:'#5B21B6'},{v:Math.round(thNo),c:'#93C5FD'}],totBW);
+  buildBar('bar-hsa',[{v:Math.round((tHsa.fed+tHsa.inState)/26),c:'#6B7280'},{v:Math.round(tHsa.fica/26),c:'#94A3B8'},{v:Math.round(k4/26),c:'#1E6B45'},{v:Math.round(hsa/26),c:'#0F766E'},{v:0,c:'#5B21B6'},{v:Math.round(thHsa),c:'#93C5FD'}],totBW);
+  buildBar('bar-all',[{v:Math.round((tHsa.fed+tHsa.inState)/26),c:'#6B7280'},{v:Math.round(tHsa.fica/26),c:'#94A3B8'},{v:Math.round(k4/26),c:'#1E6B45'},{v:Math.round(hsa/26),c:'#0F766E'},{v:Math.round(ri/26),c:'#5B21B6'},{v:Math.round(thAll),c:'#93C5FD'}],totBW);
+
+  if(pChart)pChart.destroy();
+  pChart=new Chart(document.getElementById('p-chart'),{
+    type:'bar',
+    data:{labels:['No savings','401k + HSA','+ Roth IRA'],datasets:[
+      {label:'Income tax',data:[Math.round(tNo.fed+tNo.inState),Math.round(tHsa.fed+tHsa.inState),Math.round(tHsa.fed+tHsa.inState)],backgroundColor:'#6B7280',borderRadius:3},
+      {label:'FICA',data:[Math.round(tNo.fica),Math.round(tHsa.fica),Math.round(tHsa.fica)],backgroundColor:'#94A3B8',borderRadius:3},
+      {label:'401(k)',data:[0,Math.round(k4),Math.round(k4)],backgroundColor:'#1E6B45',borderRadius:3},
+      {label:'HSA',data:[0,Math.round(hsa),Math.round(hsa)],backgroundColor:'#0F766E',borderRadius:3},
+      {label:'Roth',data:[0,0,Math.round(ri)],backgroundColor:'#5B21B6',borderRadius:3},
+      {label:'Take-home',data:[Math.round(sal-tNo.total),Math.round(sal-pretax-tHsa.total),Math.round(sal-pretax-ri-tHsa.total)],backgroundColor:'#93C5FD',borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},
+      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}}}}
+  });
+  sv('p-note',`401(k) + HSA both cut taxable income — saving <strong>${fmt((tNo.total-tHsa.total)/1)}</strong> in taxes per year. The HSA is the only account with tax-free contributions, growth, AND withdrawals. Roth is post-tax but 100% tax-free at retirement. Total retirement: <strong>${fmt(k4+hsa+ri)}/yr</strong> for a real out-of-pocket cost of <strong>${fmt(Math.abs(bwDiff)*26)}/yr</strong>.`);
+
+  sv('p-metrics',[
+    {l:'Biweekly gross',v:fmt(sal/26),c:''},
+    {l:'Take-home — no savings',v:fmt(thNo),c:'b'},
+    {l:'Take-home — 401k + HSA',v:fmt(thHsa),c:'g'},
+    {l:'Take-home — all savings',v:fmt(thAll),c:'g'},
+    {l:'Net paycheck reduction',v:'-'+fmt(Math.abs(bwDiff)),c:'a'},
+    {l:'Tax saved / paycheck',v:'+'+fmt(taxSaved),c:'g'},
+    {l:'Pre-tax savings / paycheck',v:fmt((k4+hsa)/26),c:'t'},
+    {l:'Total retirement / paycheck',v:fmt((k4+hsa+ri)/26),c:'p'},
+  ].map(m=>`<div class="metric"><div class="metric-label">${m.l}</div><div class="metric-val ${m.c}">${m.v}</div></div>`).join(''));
+}
+
+// ════════════════════════════════════
+// COAST FIRE
+// ════════════════════════════════════
+function calcCoast(){
+  const cage=+document.getElementById('c-cage').value;
+  const retAge=+document.getElementById('c-ret').value;
+  const spend=+document.getElementById('c-spend').value;
+  const inf=+document.getElementById('c-inf').value/100;
+  const rate=+document.getElementById('c-rate').value/100;
+  const contrib=getAllContrib();
+  sv('c-cage-o',cage); sv('c-ret-o',retAge); sv('c-spend-o',fmt(spend));
+  sv('c-inf-o',(+document.getElementById('c-inf').value).toFixed(2)+'%');
+  sv('c-rate-o',(+document.getElementById('c-rate').value).toFixed(1)+'%');
+
+  const spendR=spend*Math.pow(1+inf,retAge-cage);
+  const nestEgg=spendR/0.035;
+  const{ages,withC,coastS,target,coastAge}=computeCoast({startAge:cage,retireAge:retAge,annualContrib:contrib,nestEgg,rate});
+  const yrs=coastAge?coastAge-cage:null,tot=yrs?yrs*contrib:null,free=coastAge?retAge-coastAge:null;
+
+  const bEl=document.getElementById('c-banner');
+  if(coastAge&&coastAge<=retAge){
+    bEl.className='banner';
+    bEl.innerHTML=`<strong>Coast point: age ${coastAge}</strong> — after ${yrs} year${yrs===1?'':'s'} of contributions (${fmt(contrib)}/yr × ${yrs} = <strong>${fmt(tot)}</strong> deposited), the portfolio reaches <strong>${fmtK(nestEgg)}</strong> by age ${retAge} with zero new contributions. <strong>${free} contribution-free years</strong> before retirement.`;
+  }else{bEl.className='banner amber';bEl.innerHTML=`Coast point not reached before age ${retAge} with current settings. Try a higher return, longer retirement window, or more contributions.`;}
+
+  sv('c-metrics',[
+    {l:'Coast age',v:coastAge&&coastAge<=retAge?'Age '+coastAge:'N/A',c:'g'},
+    {l:'Years contributing',v:yrs&&coastAge<=retAge?yrs+' yrs':'—',c:'b'},
+    {l:'Total deposited',v:tot&&coastAge<=retAge?fmtK(tot):'—',c:'b'},
+    {l:'Required nest egg',v:fmtK(nestEgg),c:'a'},
+    {l:'Free years before retirement',v:free&&coastAge<=retAge?free+' yrs':'—',c:'g'},
+    {l:'Spending at retirement',v:fmt(Math.round(spendR))+'/yr',c:''},
+  ].map(m=>`<div class="metric"><div class="metric-label">${m.l}</div><div class="metric-val ${m.c}">${m.v}</div></div>`).join(''));
+
+  sv('c-scenarios',[
+    {label:'Return = 6%',age:getCoastAge(cage,retAge,contrib,nestEgg,0.06)},
+    {label:'Return = 8%',age:getCoastAge(cage,retAge,contrib,nestEgg,0.08)},
+    {label:'Return = 10%',age:getCoastAge(cage,retAge,contrib,nestEgg,0.10)},
+    {label:'Spend $40k/yr',age:getCoastAge(cage,retAge,contrib,40000*Math.pow(1+inf,retAge-cage)/0.035,rate)},
+    {label:'Spend $80k/yr',age:getCoastAge(cage,retAge,contrib,80000*Math.pow(1+inf,retAge-cage)/0.035,rate)},
+    {label:'Retire at 55',age:getCoastAge(cage,55,contrib,spend*Math.pow(1+inf,55-cage)/0.035,rate)},
+    {label:'Retire at 60',age:getCoastAge(cage,60,contrib,spend*Math.pow(1+inf,60-cage)/0.035,rate)},
+    {label:'401k+HSA only',age:getCoastAge(cage,retAge,getK4()+getHsa(),nestEgg,rate)},
+  ].map(s=>{
+    const diff=s.age&&coastAge?s.age-coastAge:null;
+    const ds=diff!==null?(diff>0?`+${diff} yrs`:diff<0?`${diff} yrs`:'same'):'';
+    const cl=s.age?(s.age<(coastAge||99)?'g':s.age>(coastAge||0)?'a':'b'):'a';
+    return`<div class="sc-card"><div class="sc-lbl">${s.label}</div><div class="sc-age ${cl}">${s.age?'Age '+s.age:'N/A'}</div><div class="sc-sub">${ds}</div></div>`;
+  }).join(''));
+
+  if(cChart)cChart.destroy();
+  cChart=new Chart(document.getElementById('c-chart'),{type:'line',
+    data:{labels:ages,datasets:[
+      {label:'Contributing',data:withC,borderColor:'#2563A8',backgroundColor:'rgba(37,99,168,0.07)',fill:true,tension:0.3,pointRadius:0,spanGaps:false},
+      {label:'Coasting',data:coastS,borderColor:'#1E6B45',backgroundColor:'rgba(30,107,69,0.08)',fill:true,tension:0.3,pointRadius:0,spanGaps:false},
+      {label:'Target',data:target,borderColor:'#F59E0B',borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtK(ctx.raw||0)}}},
+      scales:{x:{title:{display:true,text:'Age',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'},ticks:{maxTicksLimit:14}},
+        y:{ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}}}}
+  });
+  const grow=coastAge&&coastAge<=retAge?nestEgg-tot:0;
+  sv('c-note',coastAge&&coastAge<=retAge
+    ?`${fmtK(tot)} deposited → ${fmtK(nestEgg)} at retirement. <strong>${fmtK(grow)} (${Math.round(grow/nestEgg*100)}%)</strong> is pure compound growth — money you never earned, just waited for.`
+    :'Adjust sliders to find a path that reaches the coast point before retirement.');
+}
+
+// ════════════════════════════════════
+// RETIRE AT 50
+// ════════════════════════════════════
+function calcRetire(){
+  const cage=+document.getElementById('r-cage').value;
+  const spend=+document.getElementById('r-spend').value;
+  const inf=+document.getElementById('r-inf').value/100;
+  const swr=+document.getElementById('r-swr').value/100;
+  const rate=+document.getElementById('r-rate').value/100;
+  const contrib=getAllContrib(),retireAge=50;
+  sv('r-cage-o',cage); sv('r-spend-o',fmt(spend));
+  sv('r-inf-o',(+document.getElementById('r-inf').value).toFixed(2)+'%');
+  sv('r-swr-o',(+document.getElementById('r-swr').value).toFixed(2)+'%');
+  sv('r-rate-o',(+document.getElementById('r-rate').value).toFixed(1)+'%');
+
+  const spendAt50=spend*Math.pow(1+inf,retireAge-cage);
+  const nestEgg=spendAt50/swr;
+  const{ages,withC,coastS,target,coastAge}=computeCoast({startAge:cage,retireAge,annualContrib:contrib,nestEgg,rate});
+  const yrs=coastAge?coastAge-cage:null,tot=yrs?yrs*contrib:null;
+
+  sv('r-banner',coastAge&&coastAge<=retireAge
+    ?`To retire at 50 spending <strong>${fmt(spend)}/yr</strong> in today's dollars, you need <strong>${fmtK(nestEgg)}</strong> by age 50 (${fmt(Math.round(spendAt50))}/yr inflation-adjusted). With max contributions from age ${cage}, coast point hits at <strong>age ${coastAge}</strong> — just ${yrs} year${yrs===1?'':'s'} of saving.`
+    :`Target not reachable before age 50 with current settings — try adjusting contributions or return rate.`);
+
+  sv('r-metrics',[
+    {l:'Nest egg needed at 50',v:fmtK(nestEgg),c:'a'},
+    {l:"In today's dollars",v:fmtK(nestEgg/Math.pow(1+inf,retireAge-cage)),c:''},
+    {l:'Spending at 50 (inflated)',v:fmt(Math.round(spendAt50))+'/yr',c:'b'},
+    {l:'Coast age',v:coastAge&&coastAge<=retireAge?'Age '+coastAge:'N/A',c:'g'},
+    {l:'Years of contributions',v:yrs&&coastAge<=retireAge?yrs+' yrs':'—',c:'b'},
+    {l:'Total deposited',v:tot&&coastAge<=retireAge?fmtK(tot):'—',c:'g'},
+  ].map(m=>`<div class="metric"><div class="metric-label">${m.l}</div><div class="metric-val ${m.c}">${m.v}</div></div>`).join(''));
+
+  if(rChart)rChart.destroy();
+  rChart=new Chart(document.getElementById('r-chart'),{type:'line',
+    data:{labels:ages,datasets:[
+      {label:'Contributing',data:withC,borderColor:'#2563A8',backgroundColor:'rgba(37,99,168,0.07)',fill:true,tension:0.3,pointRadius:0,spanGaps:false},
+      {label:'Coasting',data:coastS,borderColor:'#1E6B45',backgroundColor:'rgba(30,107,69,0.08)',fill:true,tension:0.3,pointRadius:0,spanGaps:false},
+      {label:'Target',data:target,borderColor:'#F59E0B',borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtK(ctx.raw||0)}}},
+      scales:{x:{title:{display:true,text:'Age',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'},ticks:{maxTicksLimit:12}},
+        y:{ticks:{callback:v=>fmtK(v)},grid:{color:'rgba(0,0,0,0.05)'}}}}
+  });
+  const grow=coastAge&&coastAge<=retireAge?nestEgg-tot:0;
+  sv('r-note',coastAge&&coastAge<=retireAge
+    ?`Deposits ${fmtK(tot)} over ${yrs} years → ${fmtK(nestEgg)} at 50. <strong>${fmtK(grow)} (${Math.round(grow/nestEgg*100)}%) is compound growth</strong>. ${(swr*100).toFixed(2)}% SWR, sized for 40+ year retirement.`
+    :'Adjust sliders to reach the retire-at-50 target.');
+}
+
+// ════════════════════════════════════
+// LIFE SCENARIOS
+// ════════════════════════════════════
+function calcScenarios(){
+  const rate=0.07, cage=19, retireAge=50, inf=0.025;
+  const contrib=getAllContrib();
+  const nestEgg50=60000*Math.pow(1+inf,retireAge-cage)/0.035;
+
+  // Path A: 5 years contributing, then coast to 50
+  const dep5=contrib*5;
+  const bal5=compoundN(0,contrib,5,rate);
+  const at50_A=growTo(bal5,retireAge-cage-5,rate);
+  const coastA=getCoastAge(cage,retireAge,contrib,nestEgg50,rate);
+  sv('sA-dep',fmtK(dep5));
+  sv('sA-bal5',fmtK(bal5));
+  sv('sA-at50',fmtK(at50_A));
+  sv('sA-coast',coastA?'Yes — age '+coastA:'Not yet reached');
+
+  // Path B: 2 years contributing, then coast to 50
+  const dep2=contrib*2;
+  const bal2=compoundN(0,contrib,2,rate);
+  const at50_B=growTo(bal2,retireAge-cage-2,rate);
+  const coastB=getCoastAge(cage,retireAge,contrib,nestEgg50,rate);
+  sv('sB-dep',fmtK(dep2));
+  sv('sB-bal2',fmtK(bal2));
+  sv('sB-at50',fmtK(at50_B));
+  sv('sB-coast',coastB&&coastB<=(cage+2)?'Yes — age '+coastB:'Not by age '+(cage+2));
+
+  // Path C: max 5 years, then nothing — at 50
+  sv('sC-at50',fmtK(at50_A));
+
+  // Path D: career welder to coast point
+  const coastD=getCoastAge(cage,retireAge,contrib,nestEgg50,rate);
+  const yrsD=coastD?coastD-cage:null;
+  const depD=yrsD?yrsD*contrib:null;
+  const freeD=coastD?retireAge-coastD:null;
+  sv('sD-coast',coastD?'Age '+coastD:'N/A');
+  sv('sD-dep',depD?fmtK(depD):'—');
+  sv('sD-nest50',fmtK(nestEgg50));
+  sv('sD-free',freeD?freeD+' years':'—');
+}
+
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+function sv(id,html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
+
+// ════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════
+function showTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(btn){
+    btn.classList.add('active');
+    btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }
+  setTimeout(()=>{[pChart,cChart,rChart,bChart].forEach(c=>{if(c)c.resize();});},60);
+}
+
+// ════════════════════════════════════
+// PNG EXPORT
+// ════════════════════════════════════
+function exportPNG(){
+  const btn=document.getElementById('exp-btn');
+  btn.textContent='Capturing…';btn.disabled=true;
+  const panel=document.querySelector('.panel.active');
+  const tabName=document.querySelector('.tab-btn.active').textContent.trim().replace(/\s+/g,'_');
+  html2canvas(panel,{scale:2,useCORS:true,backgroundColor:'#F8FAFC',logging:false}).then(canvas=>{
+    const a=document.createElement('a');
+    a.download='financial-launchpad-'+tabName+'.png';
+    a.href=canvas.toDataURL('image/png');a.click();
+    btn.textContent='↙ Export PNG';btn.disabled=false;
+  });
+}
+
+// ════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ════════════════════════════════════
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registered:', r.scope))
+      .catch(e => console.log('SW registration failed:', e));
+  });
+}
+
+// ════════════════════════════════════
+// INIT — run everything
+// ════════════════════════════════════
+function calcAll(){
+  calcBudget();
+  calcPaycheck();
+  calcCoast();
+  calcRetire();
+  calcScenarios();
+}
+applyConfig();
+calcAll();
+</script>
+</body>
+</html>
